@@ -1,4 +1,4 @@
-package com.cg.ofr.service;
+package com.cg.ofr.serviceimpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,66 +11,71 @@ import com.cg.ofr.dto.FlatDto;
 import com.cg.ofr.entities.Flat;
 import com.cg.ofr.exception.FlatNotFoundException;
 import com.cg.ofr.repository.IFlatRepository;
+import com.cg.ofr.service.IFlatService;
+
+
 @Service
-public class FlatService {
-	@Autowired
+public class FlatService implements IFlatService{
 	
-	private IFlatRepository iflatrepository;
+	@Autowired
+	private IFlatRepository flatRepository;
+	
+	
 	
 	public FlatDto addFlat(FlatDto flatDto) {
 		Flat flat=new Flat();
 		BeanUtils.copyProperties(flatDto, flat);
-		iflatrepository.save(flat);
+		flatRepository.saveAndFlush(flat);
 		return flatDto;
 	}
 	
 	
 	
-	public FlatDto updateFlat(Integer flatId, Double cost){
+	public FlatDto updateFlat(Integer flatId, Double cost) throws FlatNotFoundException{
 		Flat flat=new Flat();
 		FlatDto flatDto=new FlatDto();
-		if(!iflatrepository.existsById(flatId)) {
+		if(!flatRepository.existsById(flatId)) {
 			throw new FlatNotFoundException();
 	}
 		else {
-	BeanUtils.copyProperties(iflatrepository.findById(flatId),flatDto);
+	BeanUtils.copyProperties(flatRepository.findById(flatId),flatDto);
 	 flatDto.setCost(cost);
 	  BeanUtils.copyProperties(flatDto, flat);
-		iflatrepository.flush();
+	  flatRepository.flush();
 		return flatDto;
 		}
 		}
-	public FlatDto deleteFlat(Integer flatId) { 
+	public FlatDto deleteFlat(Integer flatId) throws FlatNotFoundException { 
 		Flat flat=new Flat();
 		FlatDto flatDto=new FlatDto();
-		if(!iflatrepository.existsById(flatId)) {
+		if(!flatRepository.existsById(flatId)) {
 			throw new FlatNotFoundException();
 		}else
 		{
-			BeanUtils.copyProperties(iflatrepository.findById(flatId),flatDto);
-		iflatrepository.deleteById(flatId);
+			BeanUtils.copyProperties(flatRepository.findById(flatId),flatDto);
+			flatRepository.deleteById(flatId);
 		BeanUtils.copyProperties(flatDto, flat);
-		 iflatrepository.flush();
+		flatRepository.flush();
 		 return flatDto;
 	}
 	}
-	 public FlatDto viewFlat(Integer flatId) {
+	 public FlatDto viewFlat(Integer flatId) throws FlatNotFoundException {
 		
 	    Flat flat=new Flat();
 	    FlatDto flatDto=new FlatDto();
-		 iflatrepository.findById(flatId);
-		 if(iflatrepository.findById(flatId).get()==null) {
+	    flatRepository.findById(flatId);
+		 if(flatRepository.findById(flatId).get()==null) {
 		 
 		 throw new FlatNotFoundException();
 		 }
 		 else {
-		 BeanUtils.copyProperties(iflatrepository.existsById(flatId),flatDto);
-		 // flatDto.findFlatId(flatId);
+		 BeanUtils.copyProperties(flatRepository.existsById(flatId),flatDto);
+		 
 			 
 			
-		 iflatrepository.findById(flatId);
+		 flatRepository.findById(flatId);
 			 BeanUtils.copyProperties(flatDto, flat);
-			 iflatrepository.flush();
+			 flatRepository.flush();
 	   return flatDto;
 		 }
 	 }
@@ -78,7 +83,7 @@ public class FlatService {
 	 
 	 public List<FlatDto> viewAllFlat(){
 		 List<FlatDto>flatDtoList=new ArrayList<>();
-		 List<Flat>flatList=iflatrepository.findAll();
+		 List<Flat>flatList=flatRepository.findAll();
 		 FlatDto flatDto=new FlatDto();
 		 for(Flat flat:flatList) {
 			 BeanUtils.copyProperties(flat,flatDto);
@@ -90,8 +95,10 @@ public class FlatService {
 	 
 	 public List<FlatDto> findByCostAndAvailability(Double cost,String availability){
 		 
-		 return iflatrepository.findByCostAndAvailability(cost,availability);
+		 return flatRepository.findByCostAndAvailability(cost,availability);
 	 }
 }
 
 
+
+	 
